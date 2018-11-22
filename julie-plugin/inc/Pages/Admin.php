@@ -38,7 +38,7 @@ class Admin extends BaseController
 		$this->setSections();
 		$this->setFields();
 
-		$this->settings->addPages( $this->pages )->withSubPage( 'Options' )->addSubPages( $this->subpages )->register();
+		$this->settings->addPages( $this->pages )->withSubPage( 'Dashboard' )->addSubPages( $this->subpages )->register();
 	}
 
 	public function setPages() 
@@ -46,7 +46,7 @@ class Admin extends BaseController
 		$this->pages = array(
 			array(
 				'page_title' => 'Julie Plugin', 
-				'menu_title' => 'Julie Options', 
+				'menu_title' => 'Options', 
 				'capability' => 'manage_options', 
 				'menu_slug' => 'julie_plugin', 
 				'callback' => array( $this->callbacks, 'adminDashboard' ), 
@@ -68,7 +68,7 @@ class Admin extends BaseController
 				'callback' => array( $this->callbacks, 'adminCpt' )
 			),
 			array(
-				'parent_slug' => 'alecaddd_plugin', 
+				'parent_slug' => 'julie_plugin', 
 				'page_title' => 'Custom Taxonomies', 
 				'menu_title' => 'Taxonomies', 
 				'capability' => 'manage_options', 
@@ -86,56 +86,17 @@ class Admin extends BaseController
 		);
 	}
 
-//Regroupe toutes les options et d'appeler une callback
 	public function setSettings()
 	{
-		$args = array(
-			array(
+		$args = array();
+//on va chercher la clefs(id) pour l'utiliser dans la BDD avec les input
+		foreach ( $this->managers as $key => $value ) {
+			$args[] = array(
 				'option_group' => 'julie_plugin_settings',
-				'option_name' => 'cpt_manager',
-				'callback' => array( $this->callbacks, 'checkboxSanitize' )
-			),
-			array(
-				'option_group' => 'julie_plugin_settings',
-				'option_name' => 'taxonomy_manager',
-				'callback' => array( $this->callbacks, 'checkboxSanitize' )
-			),
-			array(
-				'option_group' => 'julie_plugin_settings',
-				'option_name' => 'media_widget',
-				'callback' => array( $this->callbacks, 'checkboxSanitize' )
-			),
-			array(
-				'option_group' => 'julie_plugin_settings',
-				'option_name' => 'gallery_manager',
-				'callback' => array( $this->callbacks, 'checkboxSanitize' )
-			),
-			array(
-				'option_group' => 'julie_plugin_settings',
-				'option_name' => 'testimonial_manager',
-				'callback' => array( $this->callbacks, 'checkboxSanitize' )
-			),
-			array(
-				'option_group' => 'julie_plugin_settings',
-				'option_name' => 'templates_manager',
-				'callback' => array( $this->callbacks, 'checkboxSanitize' )
-			),
-			array(
-				'option_group' => 'julie_plugin_settings',
-				'option_name' => 'login_manager',
-				'callback' => array( $this->callbacks, 'checkboxSanitize' )
-			),
-			array(
-				'option_group' => 'julie_plugin_settings',
-				'option_name' => 'membership_manager',
-				'callback' => array( $this->callbacks, 'checkboxSanitize' )
-			),
-			array(
-				'option_group' => 'julie_plugin_settings',
-				'option_name' => 'chat_manager',
-				'callback' => array( $this->callbacks, 'checkboxSanitize' )
-			),
-		);
+				'option_name' => $key,
+				'callback' => array( $this->callbacks_mngr, 'checkboxSanitize' )
+			);
+		}
 
 		$this->settings->setSettings( $args );
 	}
@@ -145,7 +106,7 @@ class Admin extends BaseController
 		$args = array(
 			array(
 				'id' => 'julie_admin_index',
-				'title' => 'Options du manager',
+				'title' => 'Settings Manager',
 				'callback' => array( $this->callbacks_mngr, 'adminSectionManager' ),
 				'page' => 'julie_plugin'
 			)
@@ -156,107 +117,21 @@ class Admin extends BaseController
 
 	public function setFields()
 	{
-		$args = array(
-			array(
-				'id' => 'cpt_manager',
-				'title' => 'Activer la gestion des CPT',
+		$args = array();
+
+		foreach ( $this->managers as $key => $value ) {
+			$args[] = array(
+				'id' => $key,
+				'title' => $value,
 				'callback' => array( $this->callbacks_mngr, 'checkboxField' ),
 				'page' => 'julie_plugin',
-				'section' => 'julie_admin_index',//égal à l'ID dans setSection
+				'section' => 'julie_admin_index',
 				'args' => array(
-					'label_for' => 'cpt_manager',
+					'label_for' => $key,
 					'class' => 'ui-toggle'
 				)
-			),
-			array(
-				'id' => 'taxonomy_manager',
-				'title' => 'Activer la gestion des taxonomy ',
-				'callback' => array( $this->callbacks_mngr, 'checkboxField' ),
-				'page' => 'julie_plugin',
-				'section' => 'julie_admin_index',//égal à l'ID dans setSection
-				'args' => array(
-					'label_for' => 'taxonomy_manager',
-					'class' => 'ui-toggle'
-				)
-			),
-			array(
-				'id' => 'media_manager',
-				'title' => 'Activer la gestion des médias',
-				'callback' => array( $this->callbacks_mngr, 'checkboxField' ),
-				'page' => 'julie_plugin',
-				'section' => 'julie_admin_index',//égal à l'ID dans setSection
-				'args' => array(
-					'label_for' => 'media_manager',
-					'class' => 'ui-toggle'
-				)
-			),
-			array(
-				'id' => 'gallery_manager',
-				'title' => 'Activer la gestion des images',
-				'callback' => array( $this->callbacks_mngr, 'checkboxField' ),
-				'page' => 'julie_plugin',
-				'section' => 'julie_admin_index',//égal à l'ID dans setSection
-				'args' => array(
-					'label_for' => 'gallery_manager',
-					'class' => 'ui-toggle'
-				)
-			),
-			array(
-				'id' => 'testimonial_manager',
-				'title' => 'Activer la gestion des commentaires',
-				'callback' => array( $this->callbacks_mngr, 'checkboxField' ),
-				'page' => 'julie_plugin',
-				'section' => 'julie_admin_index',//égal à l'ID dans setSection
-				'args' => array(
-					'label_for' => 'testimonial_manager',
-					'class' => 'ui-toggle'
-				)
-			),
-			array(
-				'id' => 'templates_manager',
-				'title' => 'Activer la gestion des templates',
-				'callback' => array( $this->callbacks_mngr, 'checkboxField' ),
-				'page' => 'julie_plugin',
-				'section' => 'julie_admin_index',//égal à l'ID dans setSection
-				'args' => array(
-					'label_for' => 'templates_manager',
-					'class' => 'ui-toggle'
-				)
-			),
-			array(
-				'id' => 'login_manager',
-				'title' => 'Activer la gestion du mot de passe',
-				'callback' => array( $this->callbacks_mngr, 'checkboxField' ),
-				'page' => 'julie_plugin',
-				'section' => 'julie_admin_index',//égal à l'ID dans setSection
-				'args' => array(
-					'label_for' => 'login_manager',
-					'class' => 'ui-toggle'
-				)
-			),
-			array(
-				'id' => 'membership_manager',
-				'title' => 'Activer la gestion des membres',
-				'callback' => array( $this->callbacks_mngr, 'checkboxField' ),
-				'page' => 'julie_plugin',
-				'section' => 'julie_admin_index',//égal à l'ID dans setSection
-				'args' => array(
-					'label_for' => 'membership_manager',
-					'class' => 'ui-toggle'
-				)
-			),
-			array(
-				'id' => 'chat_manager',
-				'title' => 'Activer la gestion du chat',
-				'callback' => array( $this->callbacks_mngr, 'checkboxField' ),
-				'page' => 'julie_plugin',
-				'section' => 'julie_admin_index',//égal à l'ID dans setSection
-				'args' => array(
-					'label_for' => 'chat_manager',
-					'class' => 'ui-toggle'
-				)
-			)
-		);
+			);
+		}
 
 		$this->settings->setFields( $args );
 	}
