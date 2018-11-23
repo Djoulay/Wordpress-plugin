@@ -88,15 +88,13 @@ class Admin extends BaseController
 
 	public function setSettings()
 	{
-		$args = array();
-//on va chercher la clefs(id) pour l'utiliser dans la BDD avec les input
-		foreach ( $this->managers as $key => $value ) {
-			$args[] = array(
+		$args = array(
+		array(
 				'option_group' => 'julie_plugin_settings',
-				'option_name' => $key,
+				'option_name' => 'julie_plugin',//cette option_name est stockée dans cpt_manager dans la BDD  
 				'callback' => array( $this->callbacks_mngr, 'checkboxSanitize' )
-			);
-		}
+			)
+		);
 
 		$this->settings->setSettings( $args );
 	}
@@ -127,6 +125,7 @@ class Admin extends BaseController
 				'page' => 'julie_plugin',
 				'section' => 'julie_admin_index',
 				'args' => array(
+					'option_name' => 'julie_plugin',
 					'label_for' => $key,
 					'class' => 'ui-toggle'
 				)
