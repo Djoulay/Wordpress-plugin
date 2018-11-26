@@ -34,4 +34,14 @@ class BaseController
 
 		);
 	}
+
+	//Vérifier si l'option est activée
+	//Si l'option n'existe pas ou n'a pas de valeur, la valeur de retour sera false.
+	// Si la clef se retrouve dans la BDD on retourne la clef son false
+	public function activated( string $key )
+	{
+		$option = get_option( 'julie_plugin' );
+
+		return isset( $option[ $key ] ) ? $option[ $key ] : false;
+	}
 }
