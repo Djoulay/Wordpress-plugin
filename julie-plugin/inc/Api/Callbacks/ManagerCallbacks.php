@@ -33,7 +33,11 @@ class ManagerCallbacks extends BaseController
 		$classes = $args['class'];
 		$option_name = $args['option_name'];
 		$checkbox = get_option( $option_name );
-		echo '<div class="' . $classes . '"><input type="checkbox" id="' . $name . '" name="' . $option_name . '[' . $name . ']" value="1" class="" ' . ($checkbox[$name] ? 'checked' : '') . '><label for="' . $name .'"><div></div></label></div>';
+
+		$checked = isset($checkbox[$name]) ? ($checkbox[$name] ? true : false) : false;
+		echo '<div class="' . $classes . '"><input type="checkbox" id="' . $name . '" name="' . $option_name . '[' . $name . ']" value="1" class="" ' . ( $checked ? 'checked' : '') . '><label for="' . $name .'"><div></div></label></div>';
 	}
 }
+//Double condition ternaire : isset si un nom d'option est défini et est différent de NULL : alors $cheked = true sinon false
 //$checkbox[$name] ? 'checked' : si $name est dans la BDD return checked
+//( $checked ? 'checked' : '') : si $checked = true alors affiché checked sinon rien
