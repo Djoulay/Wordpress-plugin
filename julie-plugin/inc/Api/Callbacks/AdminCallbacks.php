@@ -28,25 +28,33 @@ class AdminCallbacks extends BaseController
 		return require_once( "$this->plugin_path/templates/widget.php" );
 	}
 
-	public function julieOptionsGroup( $input )
+	public function adminGallery()
 	{
-		return $input;
+		echo "<h1>Gallery Manager</h1>";
 	}
 
-	public function julieAdminSection()
+	public function adminTestimonial()
 	{
-		echo 'Voici une section!';
+		echo "<h1>Testimonial Manager</h1>";
 	}
 
-	public function julieTextExample()
+	public function adminTemplates()
 	{
-		$value = esc_attr( get_option( 'text_example' ) );
-		echo '<input type="text" class="regular-text" name="text_example" value="' . $value . '" placeholder="Votre texte!">';
+		echo "<h1>Templates Manager</h1>";
 	}
 
-	public function julieFirstName()
+	public function adminAuth()
 	{
-		$value = esc_attr( get_option( 'first_name' ) );
-		echo '<input type="text" class="regular-text" name="first_name" value="' . $value . '" placeholder="Votre Prénom">';
+		echo "<h1>Templates Manager</h1>";
+	}
+
+	public function adminMembership()
+	{
+		echo "<h1>Membership Manager</h1>";
+	}
+
+	public function adminChat()
+	{
+		echo "<h1>Chat Manager</h1>";
 	}
 }

@@ -1,6 +1,6 @@
 <?php 
 /**
- * @package JuliePlugin
+ * @package  JuliePlugin
  */
 namespace Inc\Base;
 

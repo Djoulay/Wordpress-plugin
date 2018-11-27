@@ -9,30 +9,25 @@ use Inc\Base\BaseController;
 use Inc\Api\Callbacks\AdminCallbacks;
 use Inc\Api\Callbacks\ManagerCallbacks;
 
-/**
-* 
-*/
 class Dashboard extends BaseController
 {
 	public $settings;
 
 	public $callbacks;
+
 	public $callbacks_mngr;
 
 	public $pages = array();
-
-	//public $subpages = array();
 
 	public function register() 
 	{
 		$this->settings = new SettingsApi();
 
 		$this->callbacks = new AdminCallbacks();
+
 		$this->callbacks_mngr = new ManagerCallbacks();
 
 		$this->setPages();
-
-		//$this->setSubpages();
 
 		$this->setSettings();
 		$this->setSections();
@@ -46,7 +41,7 @@ class Dashboard extends BaseController
 		$this->pages = array(
 			array(
 				'page_title' => 'Julie Plugin', 
-				'menu_title' => 'Options', 
+				'menu_title' => 'Julie', 
 				'capability' => 'manage_options', 
 				'menu_slug' => 'julie_plugin', 
 				'callback' => array( $this->callbacks, 'adminDashboard' ), 
@@ -56,42 +51,12 @@ class Dashboard extends BaseController
 		);
 	}
 
-	/*public function setSubpages()
-	{
-		$this->subpages = array(
-			array(
-				'parent_slug' => 'julie_plugin', 
-				'page_title' => 'Custom Post Types', 
-				'menu_title' => 'CPT', 
-				'capability' => 'manage_options', 
-				'menu_slug' => 'julie_cpt', 
-				'callback' => array( $this->callbacks, 'adminCpt' )
-			),
-			array(
-				'parent_slug' => 'julie_plugin', 
-				'page_title' => 'Custom Taxonomies', 
-				'menu_title' => 'Taxonomies', 
-				'capability' => 'manage_options', 
-				'menu_slug' => 'julie_taxonomies', 
-				'callback' => array( $this->callbacks, 'adminTaxonomy' )
-			),
-			array(
-				'parent_slug' => 'julie_plugin', 
-				'page_title' => 'Custom Widgets', 
-				'menu_title' => 'Widgets', 
-				'capability' => 'manage_options', 
-				'menu_slug' => 'julie_widgets', 
-				'callback' => array( $this->callbacks, 'adminWidget' )
-			)
-		);
-	}*/
-
 	public function setSettings()
 	{
 		$args = array(
-		array(
+			array(
 				'option_group' => 'julie_plugin_settings',
-				'option_name' => 'julie_plugin',//cette option_name est stockée dans cpt_manager dans la BDD  
+				'option_name' => 'julie_plugin',
 				'callback' => array( $this->callbacks_mngr, 'checkboxSanitize' )
 			)
 		);
