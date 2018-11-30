@@ -1,11 +1,9 @@
-'use strict';
-
-// Load Gulp...of course: cherche dans le fichier node.modules à travers package.json
+// Load Gulp...of course
 var gulp         = require( 'gulp' );
 
-// CSS related plugins : require les packages gérés par Gulp
-var sass         = require( 'gulp-sass' );//Gulp gère le SASS par exemple
-var autoprefixer = require( 'gulp-autoprefixer' );//compatibilité css sur tous navigateurs (ex: plus besoin de webkit...)
+// CSS related plugins
+var sass         = require( 'gulp-sass' );
+var autoprefixer = require( 'gulp-autoprefixer' );
 var minifycss    = require( 'gulp-uglifycss' );
 
 // JS related plugins
@@ -25,50 +23,65 @@ var plumber      = require( 'gulp-plumber' );
 var options      = require( 'gulp-options' );
 var gulpif       = require( 'gulp-if' );
 
+// Browers related plugins
+var browserSync  = require( 'browser-sync' ).create();
+var reload       = browserSync.reload;
 
-// Project related variables : on déclare ce qu'il y a dans les dossiers
+// Project related variables
 var projectURL   = 'https://test.dev';
 
-var styleSRC     = './src/scss/mystyle.scss';
+var styleSRC     = 'src/scss/mystyle.scss';
 var styleURL     = './assets/';
 var mapURL       = './';
 
-var jsSRC        = './src/js/myscript.js';
+var jsSRC        = 'src/js/myscript.js';
 var jsURL        = './assets/';
 
-var styleWatch   = './src/scss/**/*.scss';//watch tous les **dossiers*fichiers.scss 
-var jsWatch      = './src/js/**/*.js';
-var phpWatch     = './**/*.php';
+var styleWatch   = 'src/scss/**/*.scss';
+var jsWatch      = 'src/js/**/*.js';
+var phpWatch     = '**/*.php';
 
+// Tasks
+gulp.task( 'browser-sync', function() {
+	browserSync.init({
+		proxy: projectURL,
+		https: {
+			key: '/Users/alecaddd/.valet/Certificates/test.dev.key',
+			cert: '/Users/alecaddd/.valet/Certificates/test.dev.crt'
+		},
+		injectChanges: true,
+		open: false
+	});
+});
 
-
-//Concernant le CSS
 gulp.task( 'styles', function() {
-	gulp.src( styleSRC )//la variable passée en paramètre .scss
-		.pipe( sourcemaps.init() )//pipe : contenir des actions. Initialiser le sourcemaps : fait abstraction du fichier minifier scss
+	gulp.src( styleSRC )
+		.pipe( sourcemaps.init() )
 		.pipe( sass({
-			errLogToConsole: true,//si on a une erreur dans notre sass cela se verra sur la console
-			outputStyle: 'compressed'//permet de minifier le fichier
+			errLogToConsole: true,
+			outputStyle: 'compressed'
 		}) )
-		.on( 'error', console.error.bind( console ) )//on: listener : affiche l'erreur dans la console
+		.on( 'error', console.error.bind( console ) )
 		.pipe( autoprefixer({ browsers: [ 'last 2 versions', '> 5%', 'Firefox ESR' ] }) )
-		.pipe( sourcemaps.write( mapURL ) )//fichier grâce auquel le débogueur peut faire le lien entre le code étant exécuté et les fichiers sources originaux, permettant ainsi au navigateur de reconstruire la source originale et de l'afficher dans le Débogueur.
-		.pipe( gulp.dest( styleURL ) )//changement de direction vers './assets/'; contenu dans la variable styleURL : après modifications
-		
+		.pipe( sourcemaps.write( mapURL ) )
+		.pipe( gulp.dest( styleURL ) )
+		.pipe( browserSync.stream() );
 });
 
 gulp.task( 'js', function() {
-	return browserify({//import du script principal
+	return browserify({
+		entries: [jsSRC]
 	})
-	.transform( babelify, { presets: [ 'env' ] } )//babel es6 -> vers ancien JS compréhensible par tous navigateurs
-	.bundle()//réunir tous le contenu des fichier js en un seul
+	.transform( babelify, { presets: [ 'env' ] } )
+	.bundle()
 	.pipe( source( 'myscript.js' ) )
-	.pipe( buffer() )//va avec browserify : buffer=> tampon
+	.pipe( buffer() )
 	.pipe( gulpif( options.has( 'production' ), stripDebug() ) )
 	.pipe( sourcemaps.init({ loadMaps: true }) )
-	.pipe( uglify() )//minifier le script
+	.pipe( uglify() )
 	.pipe( sourcemaps.write( '.' ) )
 	.pipe( gulp.dest( jsURL ) )
+	.pipe( browserSync.stream() );
  });
 
 function triggerPlumber( src, url ) {
@@ -77,10 +90,15 @@ function triggerPlumber( src, url ) {
 	.pipe( gulp.dest( url ) );
 }
 
-//groupe toutes les taches qu'on a dans cette tache
  gulp.task( 'default', ['styles', 'js'], function() {
 	gulp.src( jsURL + 'myscript.min.js' )
 		.pipe( notify({ message: 'Assets Compiled!' }) );
  });
 
-
+ gulp.task( 'watch', ['default', 'browser-sync'], function() {
+	gulp.watch( phpWatch, reload );
+	gulp.watch( styleWatch, [ 'styles' ] );
+	gulp.watch( jsWatch, [ 'js', reload ] );
+	gulp.src( jsURL + 'myscript.min.js' )
+		.pipe( notify({ message: 'Gulp is Watching, Happy Coding!' }) );
+ });

@@ -23,7 +23,7 @@ class SettingsApi
 		}
 
 		if ( !empty($this->settings) ) {
-			add_action( 'admin_init', array( $this, 'registerCustomFields' ) );
+			add_action( 'admin_init', array( $this, 'regisCustomFields' ) );
 		}
 	}
 
@@ -97,7 +97,7 @@ class SettingsApi
 		return $this;
 	}
 
-	public function registerCustomFields()
+	public function regisCustomFields()
 	{
 		// register setting
 		foreach ( $this->settings as $setting ) {

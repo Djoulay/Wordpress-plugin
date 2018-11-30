@@ -12,6 +12,7 @@ use Inc\Api\Callbacks\AdminCallbacks;
 /**
 * 
 */
+
 class CustomPostTypeController extends BaseController
 {
 	public $settings;
@@ -22,19 +23,23 @@ class CustomPostTypeController extends BaseController
 
 	public $subpages = array();
 
-	public $custom_post_types = array();
+	public $custom_post_types = array();//déclaration d'un tableau vide de CPT
+
 
 	public function register()
 	{
-		if ( ! $this->activated( 'cpt_manager' ) ) return;
+		if ( ! $this->activated( 'cpt_manager' ) ) return;//method activated => dans basecontroller
+		//vérification si l'option a été validée ou non dans julie_plugin (BDD) pour continuer le script
 
 		$this->settings = new SettingsApi();
 
 		$this->callbacks = new AdminCallbacks();
 
-		$this->cpt_callbacks = new CptCallbacks();
+		$this->cpt_callbacks = new CptCallbacks();//La classe CptCallBacks est instanciée dans une nouvelle variable cpt_callbacks que l'on déclare en public en amont; dont on apelle le package : use Inc\Api\Callbacks\CptCallbacks (grâce à Composer);
 
-		$this->setSubpages();
+		//Mise à jours des données
+
+		$this->setSubpages();//approprie la méthode à this class
 
 		$this->setSettings();
 
@@ -42,16 +47,18 @@ class CustomPostTypeController extends BaseController
 
 		$this->setFields();
 
+		//Puis enregistrement
 		$this->settings->addSubPages( $this->subpages )->register();
 
-		$this->storeCustomPostTypes();
+		$this->storeCpt();//méthode pour stocker les CPT dans un tableau
 
-		if ( ! empty( $this->custom_post_types ) ) {
-			add_action( 'init', array( $this, 'registerCustomPostTypes' ) );
+
+		if ( ! empty( $this->custom_post_types ) ) {//s'il n'y a pas de variable dans ce tableau alors pas d'affichage de CPT
+			add_action( 'init', array( $this, 'registercpt' ) );
 		}
 	}
 
-	public function setSubpages()
+	public function setSubpages()//personnalisation de la méthode 
 	{
 		$this->subpages = array(
 			array(
@@ -70,7 +77,7 @@ class CustomPostTypeController extends BaseController
 		$args = array(
 			array(
 				'option_group' => 'julie_plugin_cpt_settings',
-				'option_name' => 'julie_plugin_cpt',
+				'option_name' => 'julie_plugin_cpt',//que l'on retrouve dans la BDD
 				'callback' => array( $this->cpt_callbacks, 'cptSanitize' )
 			)
 		);
@@ -104,7 +111,7 @@ class CustomPostTypeController extends BaseController
 				'args' => array(
 					'option_name' => 'julie_plugin_cpt',
 					'label_for' => 'post_type',
-					'placeholder' => 'eg. product',
+					'placeholder' => 'Vos produits',
 					'array' => 'post_type'
 				)
 			),
@@ -117,7 +124,7 @@ class CustomPostTypeController extends BaseController
 				'args' => array(
 					'option_name' => 'julie_plugin_cpt',
 					'label_for' => 'singular_name',
-					'placeholder' => 'eg. Product',
+					'placeholder' => 'Vos services',
 					'array' => 'post_type'
 				)
 			),
@@ -165,66 +172,94 @@ class CustomPostTypeController extends BaseController
 		$this->settings->setFields( $args );
 	}
 
-	public function storeCustomPostTypes()
+
+
+//Pour chaque CPT de ce tableau je veux enregistrer un CPT
+	public function storecpt()
 	{
-		$options = get_option('julie_plugin_cpt') ?: array();
+		/*$this->custom_post_types = array(
+			array (
+			'post_type' => 'julie_product',
+			'name' => 'Products',
+			'singular_name' => 'Product',
+			'public' => true,
+			'has_archive' => true
+			),
+			
+			array(
+			'post_type' => 'julie_slider',
+			'name' => 'Slider',
+			'singular_name' => 'Slider',
+			'public' => true,
+			'has_archive' => true)
+		);*/
+		$options = get_option('julie_plugin_cpt') ?: array(); // si le get_option est true alors PHP va retourner autmatiquement son résultat sinon tableau vide
+		//var_dump($options);// =>array(0)
+		//die();
 
-		foreach ($options as $option) {
 
-
+		//foreach ($options as $optionKey => $optionValue) {
 			$this->custom_post_types[] = array(
-				'post_type'             => $option['post_type'],
-				'name'                  => $option['plural_name'],
-				'singular_name'         => $option['singular_name'],
-				'menu_name'             => $option['plural_name'],
-				'name_admin_bar'        => $option['singular_name'],
-				'archives'              => $option['singular_name'] . ' Archives',
-				'attributes'            => $option['singular_name'] . ' Attributes',
-				'parent_item_colon'     => 'Parent ' . $option['singular_name'],
-				'all_items'             => 'All ' . $option['plural_name'],
-				'add_new_item'          => 'Add New ' . $option['singular_name'],
+				'post_type'             => $options['post_type'],
+				'name'                  => $options['plural_name'],
+				'singular_name'         => $options['singular_name'],
+				'menu_name'             => $options['plural_name'],
+				'name_admin_bar'        => $options['singular_name'],
+				'archives'              => $options['singular_name'] . ' Archives',
+				'attributes'            => $options['singular_name'] . ' Attributes',
+				'parent_item_colon'     => 'Parent ' . $options['singular_name'],
+				'all_items'             => 'All ' . $options['plural_name'],
+				'add_new_item'          => 'Add New ' . $options['singular_name'],
 				'add_new'               => 'Add New',
-				'new_item'              => 'New ' . $option['singular_name'],
-				'edit_item'             => 'Edit ' . $option['singular_name'],
-				'update_item'           => 'Update ' . $option['singular_name'],
-				'view_item'             => 'View ' . $option['singular_name'],
-				'view_items'            => 'View ' . $option['plural_name'],
-				'search_items'          => 'Search ' . $option['plural_name'],
-				'not_found'             => 'No ' . $option['singular_name'] . ' Found',
-				'not_found_in_trash'    => 'No ' . $option['singular_name'] . ' Found in Trash',
+				'new_item'              => 'New ' . $options['singular_name'],
+				'edit_item'             => 'Edit ' . $options['singular_name'],
+				'update_item'           => 'Update ' . $options['singular_name'],
+				'view_item'             => 'View ' . $options['singular_name'],
+				'view_items'            => 'View ' . $options['plural_name'],
+				'search_items'          => 'Search ' . $options['plural_name'],
+				'not_found'             => 'No ' . $options['singular_name'] . ' Found',
+				'not_found_in_trash'    => 'No ' . $options['singular_name'] . ' Found in Trash',
 				'featured_image'        => 'Featured Image',
 				'set_featured_image'    => 'Set Featured Image',
 				'remove_featured_image' => 'Remove Featured Image',
 				'use_featured_image'    => 'Use Featured Image',
-				'insert_into_item'      => 'Insert into ' . $option['singular_name'],
-				'uploaded_to_this_item' => 'Upload to this ' . $option['singular_name'],
-				'items_list'            => $option['plural_name'] . ' List',
-				'items_list_navigation' => $option['plural_name'] . ' List Navigation',
-				'filter_items_list'     => 'Filter' . $option['plural_name'] . ' List',
-				'label'                 => $option['singular_name'],
-				'description'           => $option['plural_name'] . 'Custom Post Type',
+				'insert_into_item'      => 'Insert into ' . $options['singular_name'],
+				'uploaded_to_this_item' => 'Upload to this ' . $options['singular_name'],
+				'items_list'            => $options['plural_name'] . ' List',
+				'items_list_navigation' => $options['plural_name'] . ' List Navigation',
+				'filter_items_list'     => 'Filter' . $options['plural_name'] . ' List',
+				'label'                 => $options['singular_name'],
+				'description'           => $options['plural_name'] . 'Custom Post Type',
 				'supports'              => array( 'title', 'editor', 'thumbnail' ),
 				'taxonomies'            => array( 'category', 'post_tag' ),
 				'hierarchical'          => false,
-				'public'                => isset($option['public']) ?: false,
+				'public'                => isset($options['public']) ?: false,
 				'show_ui'               => true,
 				'show_in_menu'          => true,
 				'menu_position'         => 5,
 				'show_in_admin_bar'     => true,
 				'show_in_nav_menus'     => true,
 				'can_export'            => true,
-				'has_archive'           => isset($option['has_archive']) ?: false,
+				'has_archive'           => isset($options['has_archive']) ?: false,
 				'exclude_from_search'   => false,
 				'publicly_queryable'    => true,
 				'capability_type'       => 'post'
 			);
-		}
-	}
+			/*var_dump($option);
+			die();==>string(8) "ustainfo"*/
 
-	public function registerCustomPostTypes()
+			//julie_plugin_cpt :
+			//a:5:{s:9:"post_type";s:8:"ustainfo";s:13:"singular_name";s:9:"Usta info";s:11:"plural_name";s:10:"Usta Infos";s:6:"public";s:1:"1";s:11:"has_archive";s:1:"1";}
+		//}
+	}
+		//var_dump($options);//=>array(0);
+	
+//ON ENREGISTRE LES CPT
+	public function registercpt()
 	{
+		//var_dump('Ca fonctionne!!!!!!!!!!!!!!!!!!!');
 		foreach ($this->custom_post_types as $post_type) {
-			register_post_type( $post_type['post_type'],
+			register_post_type( $post_type['post_type'],//enregistre l'id de post_type : exemple :'post_type' => 'julie_product',
 				array(
 					'labels' => array(
 						'name'                  => $post_type['name'],
@@ -276,3 +311,4 @@ class CustomPostTypeController extends BaseController
 		}
 	}
 }
+

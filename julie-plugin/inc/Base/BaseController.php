@@ -32,10 +32,11 @@ class BaseController
 		);
 	}
 
+//Une étape pour l'enregistrement des "Managers options" dans le plugin
 	public function activated( string $key )
 	{
-		$option = get_option( 'julie_plugin' );
+		$option = get_option( 'julie_plugin' );//on va chercher si julie_plugin est activé
 
-		return isset( $option[ $key ] ) ? $option[ $key ] : false;
+		return isset( $option[ $key ] ) ? $option[ $key ] : false;//s'il y a une option il faut que cela nous retourne la clef de chacune sinon false
 	}
 }
