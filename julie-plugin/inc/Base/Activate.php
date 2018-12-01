@@ -18,5 +18,6 @@ class Activate
 
 		if ( ! get_option( 'julie_plugin_cpt' ) ) {
 			update_option( 'julie_plugin_cpt', $default );
+		}
 	}
 }
